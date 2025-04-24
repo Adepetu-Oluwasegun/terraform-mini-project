@@ -1,104 +1,313 @@
+# terraform {
+#   required_providers {
+#     aws = {
+#       source  = "hashicorp/aws"
+#       version = ">= 5.0"
+#     }
+#   }
+# }
+
+# provider "aws" {
+#   region = var.aws_region
+# }
+
+# data "aws_availability_zones" "available" {
+
+# }
+
+# resource "aws_vpc" "mini-project-vpc" {
+#   cidr_block = "10.0.0.0/16"
+
+#   tags = {
+#     Name = "mini project vpc"
+#   }
+# }
+
+# resource "aws_internet_gateway" "mini-project-igw" {
+#   vpc_id = aws_vpc.mini-project-vpc.id
+# }
+
+# resource "aws_route_table" "mini-project-rt" {
+#   vpc_id = aws_vpc.mini-project-vpc.id
+
+#   route {
+#     cidr_block = "0.0.0.0/0"
+#     gateway_id = aws_internet_gateway.mini-project-igw.id
+#   }
+
+#   tags = {
+#     Name = "mini project route table"
+#   }
+# }
+
+# resource "aws_route_table_association" "miniproject-association" {
+#   count          = 3
+#   subnet_id      = aws_subnet.mini-project-subnet[count.index].id
+#   route_table_id = aws_route_table.mini-project-rt.id
+
+# }
+
+# resource "aws_subnet" "mini-project-subnet" {
+#   count                   = 3
+#   vpc_id                  = aws_vpc.mini-project-vpc.id
+#   cidr_block              = cidrsubnet("10.0.1.0/16", 8, count.index)
+#   availability_zone       = data.aws_availability_zones.available.names[count.index]
+#   map_public_ip_on_launch = true
+
+#   tags = {
+#     name = "mini project subnet -${count.index + 1}"
+#   }
+# }
+
+# #resource "aws_network_interface" "miniproject-NIC" {
+# # subnet_id = aws_subnet.mini-project-subnet[0].id
+# #private_ip = ["10.0.1.50"]
+# #security_groups = [aws_security_group.miniproject-sg.id]
+
+# # tags = {
+# #  Name = "mini-project-eni"
+# #}
+# #}
+
+# resource "aws_security_group" "miniproject_sg" {
+#   name        = "my-security-group"
+#   description = "Allow inbound HTTP and SSH traffic"
+#   vpc_id      = aws_vpc.mini-project-vpc.id
+
+#   ingress {
+#     from_port   = 22
+#     to_port     = 22
+#     protocol    = "tcp"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
+
+#   ingress {
+#     from_port   = 80
+#     to_port     = 80
+#     protocol    = "tcp"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
+
+#   egress {
+#     from_port   = 0
+#     to_port     = 0
+#     protocol    = "-1"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
+# }
+
+# resource "aws_instance" "terraform-mini-project" {
+#   count           = 3
+#   ami             = var.ami_id
+#   instance_type   = var.instance_type
+#   key_name        = var.key_name
+#   security_groups = [aws_security_group.miniproject_sg.id]
+
+#   tags = {
+#     Name = "Mini project-${count.index + 1}"
+#   }
+
+#   # output the public ips into a file
+#   provisioner "local-exec" {
+#     command = "echo ${self.public_ip} >> host-inventory"
+#   }
+# }
+
+# resource "aws_lb" "miniproject_lb" {
+#   name               = "mini-project-load-balancer"
+#   internal           = false
+#   load_balancer_type = "application"
+#   security_groups    = [aws_security_group.miniproject_sg.id]
+#   subnets            = aws_subnet.mini-project-subnet[*].id
+
+#   enable_deletion_protection = false
+
+#   tags = {
+#     name = "miniproject-lb"
+#   }
+# }
+
+# resource "aws_lb_target_group" "miniproject_tg" {
+#   name     = "miniproject-tg"
+#   port     = 80
+#   protocol = "HTTP"
+#   vpc_id   = aws_vpc.mini-project-vpc.id
+# }
+
+# resource "aws_lb_listener" "miniproject_listener" {
+#   load_balancer_arn = aws_lb.miniproject_lb.arn
+#   port              = "80"
+#   protocol          = "HTTP"
+#   default_action {
+#     type = "fixed-response"
+#     fixed_response {
+#       status_code  = 200
+#       content_type = "text/plain"
+#       message_body = "Hello from the other side!"
+#     }
+#   }
+# }
+
+# resource "aws_lb_target_group_attachment" "miniproject_attachment" {
+#   count            = 3
+#   target_group_arn = aws_lb_target_group.miniproject_tg.arn
+#   target_id        = aws_instance.terraform-mini-project[count.index].id
+#   port             = 80
+# }
+
+#number_of_instances = 3
+
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 5.0"
+    }
+  }
+}
+
 provider "aws" {
   region = var.aws_region
 }
 
-resource "aws_security_group" "miniproject-sg" {
-  name        = "miniproject-sg"
-  description = "Allow web and SSH traffic"
+data "aws_availability_zones" "available" {}
 
-  ingress = [
-    {
-      description      = "HTTP access"
-      from_port        = 80
-      to_port          = 80
-      protocol         = "tcp"
-      cidr_blocks      = ["0.0.0.0/0"]
-      ipv6_cidr_blocks = []
-      prefix_list_ids  = []
-      security_groups  = []
-      self             = false
-    },
-    {
-      description      = "SSH access"
-      from_port        = 22
-      to_port          = 22
-      protocol         = "tcp"
-      cidr_blocks      = ["0.0.0.0/0"]
-      ipv6_cidr_blocks = []
-      prefix_list_ids  = []
-      security_groups  = []
-      self             = false
-    }
-  ]
-
-  egress = [
-    {
-      description      = "Allow all outbound"
-      from_port        = 0
-      to_port          = 0
-      protocol         = "-1"
-      cidr_blocks      = ["0.0.0.0/0"]
-      ipv6_cidr_blocks = []
-      prefix_list_ids  = []
-      security_groups  = []
-      self             = false
-    }
-  ]
+resource "aws_vpc" "mini_project_vpc" {
+  cidr_block = var.cidr_block
 
   tags = {
-    Name = "miniproject-sg"
+    Name = "mini-project-vpc"
   }
 }
 
-resource "aws_instance" "terraform-mini-project" {
-  count         = 3
-  ami           = var.ami_id
-  instance_type = var.instance_type
-  key_name      = var.key_name
-  subnet_id     = var.subnet_ID
-  #security_groups = [ var.security_group_ID ]
+resource "aws_internet_gateway" "mini_project_igw" {
+  vpc_id = aws_vpc.mini_project_vpc.id
 
   tags = {
-    Name = "MyEC2Instance-${count.index}"
-  }
-  # output the public ips into a file
-  provisioner "local-exec" {
-    command = "echo ${self.public_ip} >> host-inventory"
+    Name = "mini-project-igw"
   }
 }
 
-resource "aws_lb" "miniproject_lb" {
-  name               = "mini-project-load-balancer"
+resource "aws_route_table" "mini_project_rt" {
+  vpc_id = aws_vpc.mini_project_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.mini_project_igw.id
+  }
+
+  tags = {
+    Name = "mini-project-rt"
+  }
+}
+
+resource "aws_subnet" "mini_project_subnet" {
+  count                   = 3
+  vpc_id                  = aws_vpc.mini_project_vpc.id
+  cidr_block              = cidrsubnet("10.0.1.0/16", 8, count.index)
+  availability_zone       = data.aws_availability_zones.available.names[count.index]
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "mini-project-subnet-${count.index + 1}"
+  }
+}
+
+resource "aws_route_table_association" "mini_project_association" {
+  count          = 3
+  subnet_id      = aws_subnet.mini_project_subnet[count.index].id
+  route_table_id = aws_route_table.mini_project_rt.id
+}
+
+resource "aws_security_group" "mini_project_sg" {
+  name        = "mini-project-sg"
+  description = "Allow inbound HTTP and SSH traffic"
+  vpc_id      = aws_vpc.mini_project_vpc.id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "mini-project-sg"
+  }
+}
+
+resource "aws_instance" "mini_project_instance" {
+  count           = 3
+  ami             = var.ami_id
+  instance_type   = var.instance_type
+  key_name        = var.key_name
+  security_groups = [aws_security_group.mini_project_sg.id]
+  subnet_id       = aws_subnet.mini_project_subnet[count.index].id
+
+  tags = {
+    Name = "mini-project-instance-${count.index + 1}"
+  }
+}
+
+resource "aws_lb" "mini_project_lb" {
+  name               = "mini-project-lb"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.miniproject-sg.id]
-  subnets            = [var.subnet_ID]
+  security_groups    = [aws_security_group.mini_project_sg.id]
+  subnets            = aws_subnet.mini_project_subnet[*].id
 
   enable_deletion_protection = false
+
+  tags = {
+    Name = "mini-project-lb"
+  }
 }
 
-resource "aws_lb_target_group" "miniproject_tg" {
-  name     = "miniproject-tg"
+resource "aws_lb_target_group" "mini_project_tg" {
+  name     = "mini-project-tg"
   port     = 80
   protocol = "HTTP"
-  vpc_id   = var.vpc_ID
+  vpc_id   = aws_vpc.mini_project_vpc.id
+
+  tags = {
+    Name = "mini-project-tg"
+  }
 }
-resource "aws_lb_listener" "miniproject_listener" {
-  load_balancer_arn = aws_lb.miniproject_lb.arn
+
+resource "aws_lb_listener" "mini_project_listener" {
+  load_balancer_arn = aws_lb.mini_project_lb.arn
   port              = 80
+  protocol          = "HTTP"
+
   default_action {
     type = "fixed-response"
+
     fixed_response {
       status_code  = 200
       content_type = "text/plain"
-      message_body = "Helo from the other side!"
+      message_body = "Hello from the other side!"
     }
   }
 }
 
-resource "aws_lb_target_group_attachment" "miniproject_attachment" {
+resource "aws_lb_target_group_attachment" "mini_project_attachment" {
   count            = 3
-  target_group_arn = aws_lb_target_group.miniproject_tg.arn
-  target_id        = aws_instance.terraform-mini-project[count.index].id
+  target_group_arn = aws_lb_target_group.mini_project_tg.arn
+  target_id        = aws_instance.mini_project_instance[count.index].id
   port             = 80
 }
+
