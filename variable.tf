@@ -8,26 +8,27 @@ variable "instance_type" {
   default     = "t3.micro"
 }
 
-#variable "number_of_instances" {
-#description = "number of instances"
-#}
-
 variable "ami_id" {
   description = "Amazon Machine Image (AMI) ID"
-  default = "ami-0c1ac8a41498c1a9c"
+  default     = "ami-0c1ac8a41498c1a9c"
 }
 
 variable "key_name" {
   description = "Name of EC2 key pair"
-  default = "miniproject"
+  default     = "miniproject"
 }
 
 variable "cidr_block" {
   description = "cidr block"
-  default = "10.0.0.0/16"
-  
+  default     = "10.0.0.0/16"
+
 }
 
+variable "domain_name" {
+  description = "my domain name"
+  default     = "oluwasegun.me"
+
+}
 #variable "security_group_ID" {
 #description = "Security Group ID"
 #}
@@ -38,4 +39,3 @@ variable "cidr_block" {
 
 #variable "vpc_ID" {
 #description = "VPC ID"
-#}

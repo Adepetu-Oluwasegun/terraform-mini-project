@@ -98,7 +98,11 @@ resource "aws_instance" "mini_project_instance" {
   key_name        = var.key_name
   security_groups = [aws_security_group.mini_project_sg.id]
   subnet_id       = aws_subnet.mini_project_subnet[count.index].id
-
+  user_data       = <<-EOF
+                #!/bin/bash
+                sudo apt-get update -y
+                sudo apt-get upgrade -y
+                EOF
   tags = {
     Name = "mini-project-instance-${count.index + 1}"
   }
@@ -118,6 +122,7 @@ resource "aws_lb" "mini_project_lb" {
   }
 }
 
+
 resource "aws_lb_target_group" "mini_project_tg" {
   name     = "mini-project-tg"
   port     = 80
@@ -135,13 +140,8 @@ resource "aws_lb_listener" "mini_project_listener" {
   protocol          = "HTTP"
 
   default_action {
-    type = "fixed-response"
-
-    fixed_response {
-      status_code  = 200
-      content_type = "text/plain"
-      message_body = "Hello from the other side!"
-    }
+    type = "forward"
+    target_group_arn = aws_lb_target_group.mini_project_tg.arn
   }
 }
 
@@ -152,3 +152,18 @@ resource "aws_lb_target_group_attachment" "mini_project_attachment" {
   port             = 80
 }
 
+resource "aws_route53_zone" "mini_project_r53" {
+  name = var.domain_name
+}
+
+resource "aws_route53_record" "mini_project_r53_record" {
+  zone_id = aws_route53_zone.mini_project_r53.zone_id
+  name    = var.domain_name
+  type    = "A"
+
+  alias {
+    name                   = aws_lb.mini_project_lb.dns_name
+    zone_id                = aws_lb.mini_project_lb.zone_id
+    evaluate_target_health = true
+  }
+}
