@@ -1,5 +1,5 @@
 variable "aws_region" {
-  #description = "AWS region"
+  description = "AWS region"
   default = "eu-north-1"
 }
 
@@ -29,13 +29,3 @@ variable "domain_name" {
   default     = "oluwasegun.me"
 
 }
-#variable "security_group_ID" {
-#description = "Security Group ID"
-#}
-
-#variable "subnet_ID" {
-#description = "Subnet ID"
-#}
-
-#variable "vpc_ID" {
-#description = "VPC ID"
