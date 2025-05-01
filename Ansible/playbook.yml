@@ -1,0 +1,35 @@
+---
+- name: Configure web servers
+  hosts: webservers
+
+  tasks:
+  - name: Install Apache
+    apt:
+      name: apache2
+      state: latest
+      update_cache: yes
+    become: true
+
+  - name: Ensure apache is running
+    service:
+      name: apache2
+      state: started
+      enabled: yes
+
+  - name: Set timezone to Africa/Lagos
+    ansible.builtin.timezone:
+      name: Africa/Lagos
+    become: yes
+
+  - name: Deploy HTML page with server identifier
+    copy:
+      content: |
+        <html>
+           <head><title>Web server</title></head>
+           <body>
+             <h1>Welcome to server: {{ inventory_hostname }}</h1>
+             <p>This is  simple webpage identifying this server.</p>
+           </body>
+        </html>
+      dest: /var/www/html/index.html
+    become: true
