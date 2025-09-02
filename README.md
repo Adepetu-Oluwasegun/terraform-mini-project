@@ -3,7 +3,7 @@
 ---
 
 This project demonstrates the **provisioning of AWS infrastructure with Terraform** and **configuration management with Ansible**.
-It creates **three Ubuntu EC2 instances** in a **private subnet**, deploys them behind an **Elastic Load Balancer (ELB)**, and uses **Ubuntu on WSL as a bastion host** for secure access.
+It creates **three Ubuntu EC2 instances** in a **private subnet**, deploys them behind an **Application Load Balancer (ALB)**, and uses **Ubuntu on WSL as a bastion host** for secure access.
 Each instance is configured with **Apache** to serve a unique HTML page for identification.
 
 ---
@@ -80,7 +80,7 @@ terraform-mini-project-ansible/
 
 ## **Prerequisites**
 
-* **AWS Account** with permissions for EC2, VPC, and ELB
+* **AWS Account** with permissions for EC2, VPC, and ALB
 * **Installed Tools**:
 
   * [Terraform](https://developer.hashicorp.com/terraform/downloads) (v5.0+)
@@ -137,7 +137,9 @@ terraform apply -auto-approve
 * ALB DNS name
 * Private IPs of EC2 instances
 * Bastion host public IP
-* 
+* name of servers
+* subdomain url
+* domain url
 
 ---
 
