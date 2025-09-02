@@ -53,7 +53,7 @@ The setup includes:
 
 ## **Tools and Technologies**
 
-* **AWS** – EC2, VPC, ELB, Security Groups
+* **AWS** – EC2, VPC, ALB, Security Groups
 * **Terraform** – Infrastructure as Code
 * **Ansible** – Configuration management
 * **Ubuntu on WSL (Windows Subsystem for Linux)** – Bastion host environment
@@ -83,7 +83,7 @@ terraform-mini-project-ansible/
 * **AWS Account** with permissions for EC2, VPC, and ELB
 * **Installed Tools**:
 
-  * [Terraform](https://developer.hashicorp.com/terraform/downloads) (v5.1+)
+  * [Terraform](https://developer.hashicorp.com/terraform/downloads) (v5.0+)
   * [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) (v2.14+)
   * [AWS CLI](https://aws.amazon.com/cli/) (v2+)
   * [Ubuntu WSL](https://learn.microsoft.com/en-us/windows/wsl/install)
@@ -134,7 +134,7 @@ terraform apply -auto-approve
 
 **Outputs include:**
 
-* ELB DNS name
+* ALB DNS name
 * Private IPs of EC2 instances
 * Bastion host public IP
 * 
