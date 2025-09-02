@@ -64,14 +64,14 @@ The setup includes:
 ## **Project Structure**
 
 ```
-aws-ec2-lb-ansible/
+terraform-mini-project-ansible/
 ├── terraform/
 │   ├── main.tf
 │   ├── variables.tf
 │   ├── outputs.tf
 
 ├── ansible/
-│   ├── inventory.ini
+│   ├── host-inventory
 │   ├── playbook.yml
 └── README.md
 ```
